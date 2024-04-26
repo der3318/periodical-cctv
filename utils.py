@@ -13,5 +13,14 @@ def getUserDocumentsPath():
 
 
 # https://stackoverflow.com/a/41432835
-def getPublicIP():
-    return urllib.request.urlopen("https://v4.ident.me").read().decode("utf8")
+def getPublicIP(config):
+    return urllib.request.urlopen(config.get("discoverip", "endpoint")).read().decode("utf-8")
+
+
+def lineNotify(config, message):
+    headers = {"Authorization": "Bearer {}".format(config.get("linenotify", "bearer"))}
+    body = {"message": message}
+    data = urllib.parse.urlencode(body)
+    req = urllib.request.Request(config.get("linenotify", "endpoint"), data = data.encode("utf-8"), method = "POST", headers = headers)
+    with urllib.request.urlopen(req) as res:
+        return res.read().decode("utf-8")
