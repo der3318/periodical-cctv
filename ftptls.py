@@ -7,7 +7,7 @@ import ssl
 import types
 
 
-# https://stackoverflow.com/a/70831036
+# https://stackoverflow.com/a/50129806
 def storbinarynounwrap(self, cmd, fp, blocksize = 8192, callback = None, rest = None):
     self.voidcmd("TYPE I")
     with self.transfercmd(cmd, rest) as conn:
@@ -24,12 +24,11 @@ def storbinarynounwrap(self, cmd, fp, blocksize = 8192, callback = None, rest = 
 
 def uploadTimestampedMP4(config, mp4):
     filename = "{}.mp4".format(datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
-    ftps = ftplib.FTP_TLS(config.get("ftptls", "host"))
-    ftps.storbinary = types.MethodType(storbinarynounwrap, ftps)
-    ftps.login(config.get("ftptls", "user"), config.get("ftptls", "passwd"))
-    ftps.prot_p()
-    ftps.cwd(config.get("ftptls", "folder"))
-    with open(mp4, "rb") as clip:
-        ftps.storbinary("STOR {}".format(filename), clip)
-    ftps.close()
+    with ftplib.FTP_TLS(config.get("ftptls", "host")) as ftps:
+        ftps.storbinary = types.MethodType(storbinarynounwrap, ftps)
+        ftps.login(config.get("ftptls", "user"), config.get("ftptls", "passwd"))
+        ftps.prot_p()
+        ftps.cwd(config.get("ftptls", "folder"))
+        with open(mp4, "rb") as clip:
+            ftps.storbinary("STOR {}".format(filename), clip)
     return filename
