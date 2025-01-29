@@ -4,7 +4,9 @@
 
 # standard libs
 import configparser
+import logging
 import os
+import sys
 import time
 
 # third party libs
@@ -20,6 +22,15 @@ def main():
     # config from ini file
     config = configparser.ConfigParser()
     config.read(os.path.join(utils.getUserDocumentsPath(), "cctv.ini"))
+
+    # logging settings
+    logging.basicConfig(
+        handlers=[
+            logging.StreamHandler(sys.stdout),
+            logging.FileHandler(os.path.join(utils.getUserDocumentsPath(), "cctv.log"), mode="w"),
+        ],
+        level=logging.DEBUG,
+    )
 
     # worker for repeated task
     while True:
@@ -48,14 +59,14 @@ def main():
 
             # upload mp4 to ftp tls site
             ip = utils.getPublicIP(config)
-            filename = ftptls.uploadTimestampedMP4(config, mp4)
-            utils.lineNotify(config, "CCTV {} uploaded from {} successfully".format(filename, ip))
+            filename = ftptls.uploadTimestampedMP4(config, ip, mp4)
+            utils.lineNotify(config, "CCTV {} uploaded successfully".format(filename))
 
         except Exception as e:
             try:
                 utils.lineNotify(config, "Error: {}".format(e))
             except Exception:
-                print("Error: {}".format(e))
+                logging.debug("Error: {}".format(e))
 
         # idle for a while
         time.sleep(config.getint("capture", "idle"))

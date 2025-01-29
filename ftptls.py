@@ -22,8 +22,8 @@ def storbinarynounwrap(self, cmd, fp, blocksize = 8192, callback = None, rest = 
     return self.voidresp()
 
 
-def uploadTimestampedMP4(config, mp4):
-    filename = "{}.mp4".format(datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+def uploadTimestampedMP4(config, ip, mp4):
+    filename = "{}-{}.mp4".format(datetime.datetime.now().strftime("%Y%m%d%H%M%S"), ip)
     with ftplib.FTP_TLS(config.get("ftptls", "host")) as ftps:
         ftps.storbinary = types.MethodType(storbinarynounwrap, ftps)
         ftps.login(config.get("ftptls", "user"), config.get("ftptls", "passwd"))
